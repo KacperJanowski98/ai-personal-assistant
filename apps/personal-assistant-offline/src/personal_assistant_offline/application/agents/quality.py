@@ -31,6 +31,7 @@ class QualityScoreAgent:
 
     Attributes:
         model_id: The ID of the language model to use for quality evaluation.
+        ollama_base_url: Base URL for the Ollama API server.
         mock: If True, returns mock quality scores instead of using the model.
         max_concurrent_requests: Maximum number of concurrent API requests.
     """
@@ -58,11 +59,13 @@ DOCUMENT:
 
     def __init__(
         self,
-        model_id: str = "gpt-4o-mini",
+        model_id: str = "qwen2.5:14b",  # Remove 'ollama/' prefix as LiteLLM adds provider prefix
+        ollama_base_url: str = "http://localhost:11434",
         mock: bool = False,
-        max_concurrent_requests: int = 10,
+        max_concurrent_requests: int = 5,
     ) -> None:
         self.model_id = model_id
+        self.ollama_base_url = ollama_base_url
         self.mock = mock
         self.max_concurrent_requests = max_concurrent_requests
 
@@ -109,7 +112,7 @@ DOCUMENT:
             f"Current process memory usage: {start_mem // (1024 * 1024)} MB"
         )
 
-        scored_documents = await self.__process_batch(documents, await_time_seconds=7)
+        scored_documents = await self.__process_batch(documents, await_time_seconds=10)
         documents_with_scores = [
             doc for doc in scored_documents if doc.content_quality_score is not None
         ]
@@ -123,7 +126,7 @@ DOCUMENT:
                 f"Retrying {len(documents_without_scores)} failed documents with increased await time..."
             )
             retry_results = await self.__process_batch(
-                documents_without_scores, await_time_seconds=20
+                documents_without_scores, await_time_seconds=30
             )
 
             documents_with_scores += retry_results
@@ -189,25 +192,32 @@ DOCUMENT:
             return document.add_quality_score(score=0.5)
 
         async def process_document() -> Document:
+            # Limit content length to avoid excessive token usage
+            content = document.content
+            if len(content) > 16000:  # Arbitrary limit to keep content reasonable
+                logger.info(f"Document {document.id} content is very long, truncating to 16000 chars")
+                content = content[:16000]
+                
             input_user_prompt = self.SYSTEM_PROMPT_TEMPLATE.format(
-                document=document.content
+                document=content
             )
-            try:
-                input_user_prompt = utils.clip_tokens(
-                    input_user_prompt, max_tokens=8192, model_id=self.model_id
-                )
-            except Exception as e:
-                logger.warning(
-                    f"Failed to clip tokens for document {document.id}: {str(e)}"
-                )
+            # Simple character-based truncation instead of token-based
+            if len(input_user_prompt) > 8000:
+                logger.info(f"Truncating prompt for document {document.id} from {len(input_user_prompt)} to 8000 characters")
+                input_user_prompt = input_user_prompt[:8000]
 
             try:
+                # Ensure the messages are formatted correctly for Ollama
+                # Ollama through LiteLLM might only support 'user' role in specific ways
                 response = await acompletion(
                     model=self.model_id,
                     messages=[
-                        {"role": "user", "content": input_user_prompt},
+                        {"role": "user", "content": "You are an AI assistant that evaluates document quality.\n\n" + input_user_prompt},
                     ],
+                    api_base=self.ollama_base_url,
                     stream=False,
+                    max_tokens=1024,
+                    temperature=0.1,
                 )
                 await asyncio.sleep(await_time_seconds)  # Rate limiting
 
@@ -246,11 +256,21 @@ DOCUMENT:
             return None
 
         try:
-            dict_content = json.loads(answer)
+            # Try to find JSON in the response if the model included additional text
+            import re
+            json_pattern = r'(\{[\s\S]*"score"[\s\S]*\})'
+            json_matches = re.findall(json_pattern, answer)
+            
+            if json_matches:
+                dict_content = json.loads(json_matches[0])
+            else:
+                dict_content = json.loads(answer)
+                
             return QualityScoreResponseFormat(
                 score=dict_content["score"],
             )
-        except Exception:
+        except Exception as e:
+            logger.warning(f"Failed to parse model output: {str(e)}")
             return None
 
 
