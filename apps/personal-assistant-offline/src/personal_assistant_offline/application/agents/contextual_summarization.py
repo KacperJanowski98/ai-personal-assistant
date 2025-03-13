@@ -62,7 +62,7 @@ Please give a short succinct context of maximum {characters} characters to situa
 
     def __init__(
         self,
-        model_id: str = "qwen2.5:14b",  # Remove 'ollama/' prefix as LiteLLM adds provider prefix
+        model_id: str = "qwen2.5:7b",
         ollama_base_url: str = "http://localhost:11434",
         max_characters: int = 128,
         mock: bool = False,
@@ -295,7 +295,7 @@ highlighting the most significant insights. Answer only with the succinct contex
 
     def __init__(
         self,
-        model_id: str = "ollama/qwen2.5:14b",
+        model_id: str = "ollama/qwen2.5:7b",
         ollama_base_url: str = "http://localhost:11434",
         max_characters: int = 128,
         mock: bool = False,

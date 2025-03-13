@@ -16,7 +16,7 @@ def etl(
     data_dir: Path,
     load_collection_name: str,
     max_workers: int = 5,
-    quality_agent_model_id: str = "ollama/qwen2.5:14b",
+    quality_agent_model_id: str = "ollama/qwen2.5:7b",
     quality_agent_mock: bool = True,
 ) -> None:
     notion_data_dir = data_dir / "notion"

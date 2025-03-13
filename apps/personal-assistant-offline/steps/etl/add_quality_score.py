@@ -12,9 +12,9 @@ from src.personal_assistant_offline.domain import Document
 @step
 def add_quality_score(
     documents: list[Document],
-    model_id: str = "gpt-4o-mini",
+    model_id: str = "ollama/qwen2.5:7b",
     mock: bool = False,
-    max_workers: int = 10,
+    max_workers: int = 5,
 ) -> Annotated[list[Document], "scored_documents"]:
     """Adds quality scores to documents using heuristic and model-based scoring agents.
 
@@ -25,11 +25,11 @@ def add_quality_score(
     Args:
         documents: List of documents to evaluate for quality
         model_id: Identifier for the model to use in quality assessment.
-            Defaults to "gpt-4o-mini"
+            Defaults to "qwen2.5:7b"
         mock: If True, uses mock responses instead of real model calls.
             Defaults to False
         max_workers: Maximum number of concurrent quality check operations.
-            Defaults to 10
+            Defaults to 5
 
     Returns:
         list[Document]: Documents enhanced with quality scores, annotated as
