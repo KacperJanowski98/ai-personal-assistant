@@ -18,7 +18,7 @@ class Settings(BaseSettings):
         default=None, description="API key for Comet ML and Opik services."
     )
     COMET_PROJECT: str = Field(
-        default="second_brain_course",
+        default="ai-personal-assistant",
         description="Project name for Comet ML and Opik tracking.",
     )
 
@@ -28,10 +28,7 @@ class Settings(BaseSettings):
     )
     HUGGINGFACE_DEDICATED_ENDPOINT: str | None = Field(
         default=None,
-        description="Dedicated endpoint URL for real-time inference. "
-        "If provided, we will use the dedicated endpoint instead of OpenAI. "
-        "For example, https://um18v2aeit3f6g1b.eu-west-1.aws.endpoints.huggingface.cloud/v1/, "
-        "with /v1 after the endpoint URL.",
+        description="Dedicated endpoint URL for real-time inference.",
     )
 
     # --- MongoDB Atlas Configuration ---

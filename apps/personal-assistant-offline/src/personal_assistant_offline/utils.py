@@ -1,8 +1,8 @@
 import random
 import string
-from loguru import logger
 
 import tiktoken
+from loguru import logger
 
 
 def merge_dicts(dict1: dict, dict2: dict) -> dict:

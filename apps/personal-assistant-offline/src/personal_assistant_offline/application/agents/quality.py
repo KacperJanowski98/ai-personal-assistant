@@ -8,7 +8,6 @@ from loguru import logger
 from pydantic import BaseModel
 from tqdm.asyncio import tqdm
 
-from src.personal_assistant_offline import utils
 from src.personal_assistant_offline.domain import Document
 
 
