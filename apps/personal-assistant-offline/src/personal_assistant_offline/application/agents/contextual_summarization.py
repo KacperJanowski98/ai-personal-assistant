@@ -224,12 +224,17 @@ Please give a short succinct context of maximum {characters} characters to situa
         async def process_document() -> ContextualDocument:
             try:
                 # Combine system and user messages into one user message for Ollama
-                combined_prompt = "You are a helpful assistant specialized in summarizing documents.\n\n" + self.SYSTEM_PROMPT_TEMPLATE.format(
-                    characters=self.max_characters,
-                    content=document.content[:4000],  # Keep it short to lower latency and for context limits
-                    chunk=document.chunk,
+                combined_prompt = (
+                    "You are a helpful assistant specialized in summarizing documents.\n\n"
+                    + self.SYSTEM_PROMPT_TEMPLATE.format(
+                        characters=self.max_characters,
+                        content=document.content[
+                            :4000
+                        ],  # Keep it short to lower latency and for context limits
+                        chunk=document.chunk,
+                    )
                 )
-                
+
                 response = await acompletion(
                     model=self.model_id,
                     messages=[
@@ -252,7 +257,7 @@ Please give a short succinct context of maximum {characters} characters to situa
                 context_summary: str = response.choices[0].message.content
                 # Make sure the summary doesn't exceed the max character limit
                 if len(context_summary) > self.max_characters:
-                    context_summary = context_summary[:self.max_characters]
+                    context_summary = context_summary[: self.max_characters]
                 return document.add_contextual_summarization(context_summary)
             except Exception as e:
                 logger.warning(f"Failed to generate contextual summary: {str(e)}")
@@ -392,11 +397,13 @@ highlighting the most significant insights. Answer only with the succinct contex
         async def process_document() -> ContextualDocument:
             try:
                 # Combine system and user messages into one user message for Ollama
-                combined_prompt = "You are a helpful assistant specialized in summarizing documents.\n\n" + self.SYSTEM_PROMPT_TEMPLATE.format(
-                    characters=self.max_characters, 
-                    content=document.content[:4000]
+                combined_prompt = (
+                    "You are a helpful assistant specialized in summarizing documents.\n\n"
+                    + self.SYSTEM_PROMPT_TEMPLATE.format(
+                        characters=self.max_characters, content=document.content[:4000]
+                    )
                 )
-                
+
                 response = await acompletion(
                     model=self.model_id,
                     messages=[
@@ -419,7 +426,7 @@ highlighting the most significant insights. Answer only with the succinct contex
                 context_summary: str = response.choices[0].message.content
                 # Make sure the summary doesn't exceed the max character limit
                 if len(context_summary) > self.max_characters:
-                    context_summary = context_summary[:self.max_characters]
+                    context_summary = context_summary[: self.max_characters]
                 return document.add_contextual_summarization(context_summary)
             except Exception as e:
                 logger.warning(f"Failed to generate contextual summary: {str(e)}")

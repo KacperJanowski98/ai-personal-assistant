@@ -211,4 +211,3 @@ class MongoDBService(Generic[T]):
 
         self.client.close()
         logger.debug("Closed MongoDB connection.")
-    

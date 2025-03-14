@@ -56,13 +56,13 @@ def clip_tokens(text: str, max_tokens: int, model_id: str) -> str:
     else:
         # Just use the model_id as is, it might already be without the prefix
         base_model = model_id
-        
+
         # Extract the model family name (before the colon if present)
         if ":" in base_model:
             base_model = base_model.split(":")[0]
-            
+
         logger.debug(f"Using base model name '{base_model}' for tokenization")
-        
+
         # Map known Ollama models to appropriate tiktoken encodings
         model_mapping = {
             "qwen": "cl100k_base",  # Use cl100k_base for Qwen models
@@ -73,12 +73,14 @@ def clip_tokens(text: str, max_tokens: int, model_id: str) -> str:
             "mistral": "cl100k_base",  # Use cl100k_base for Mistral models
             "phi": "cl100k_base",  # Use cl100k_base for Phi models
         }
-        
+
         # If we have a mapping for this model, use it; otherwise fall back to cl100k_base
         if base_model in model_mapping:
             model_id = model_mapping[base_model]
         else:
-            logger.warning(f"Unknown Ollama model '{model_id}', falling back to cl100k_base encoding")
+            logger.warning(
+                f"Unknown Ollama model '{model_id}', falling back to cl100k_base encoding"
+            )
             model_id = "cl100k_base"
 
     try:
@@ -86,7 +88,9 @@ def clip_tokens(text: str, max_tokens: int, model_id: str) -> str:
         encoding = tiktoken.encoding_for_model(model_id)
     except KeyError:
         # Fallback to cl100k_base encoding (used by gpt-4, gpt-3.5-turbo, text-embedding-ada-002)
-        logger.warning(f"No specific encoding found for {model_id}, falling back to cl100k_base")
+        logger.warning(
+            f"No specific encoding found for {model_id}, falling back to cl100k_base"
+        )
         encoding = tiktoken.get_encoding("cl100k_base")
 
     # Encode the text and check token count
@@ -96,5 +100,7 @@ def clip_tokens(text: str, max_tokens: int, model_id: str) -> str:
         return text
 
     # Clip to max_tokens
-    logger.info(f"Text exceeds token limit ({len(tokens)} > {max_tokens}), clipping to {max_tokens} tokens")
+    logger.info(
+        f"Text exceeds token limit ({len(tokens)} > {max_tokens}), clipping to {max_tokens} tokens"
+    )
     return encoding.decode(tokens[:max_tokens])

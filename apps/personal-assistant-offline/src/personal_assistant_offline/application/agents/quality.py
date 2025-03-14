@@ -194,15 +194,17 @@ DOCUMENT:
             # Limit content length to avoid excessive token usage
             content = document.content
             if len(content) > 16000:  # Arbitrary limit to keep content reasonable
-                logger.info(f"Document {document.id} content is very long, truncating to 16000 chars")
+                logger.info(
+                    f"Document {document.id} content is very long, truncating to 16000 chars"
+                )
                 content = content[:16000]
-                
-            input_user_prompt = self.SYSTEM_PROMPT_TEMPLATE.format(
-                document=content
-            )
+
+            input_user_prompt = self.SYSTEM_PROMPT_TEMPLATE.format(document=content)
             # Simple character-based truncation instead of token-based
             if len(input_user_prompt) > 8000:
-                logger.info(f"Truncating prompt for document {document.id} from {len(input_user_prompt)} to 8000 characters")
+                logger.info(
+                    f"Truncating prompt for document {document.id} from {len(input_user_prompt)} to 8000 characters"
+                )
                 input_user_prompt = input_user_prompt[:8000]
 
             try:
@@ -211,7 +213,11 @@ DOCUMENT:
                 response = await acompletion(
                     model=self.model_id,
                     messages=[
-                        {"role": "user", "content": "You are an AI assistant that evaluates document quality.\n\n" + input_user_prompt},
+                        {
+                            "role": "user",
+                            "content": "You are an AI assistant that evaluates document quality.\n\n"
+                            + input_user_prompt,
+                        },
                     ],
                     api_base=self.ollama_base_url,
                     stream=False,
@@ -257,14 +263,15 @@ DOCUMENT:
         try:
             # Try to find JSON in the response if the model included additional text
             import re
+
             json_pattern = r'(\{[\s\S]*"score"[\s\S]*\})'
             json_matches = re.findall(json_pattern, answer)
-            
+
             if json_matches:
                 dict_content = json.loads(json_matches[0])
             else:
                 dict_content = json.loads(answer)
-                
+
             return QualityScoreResponseFormat(
                 score=dict_content["score"],
             )

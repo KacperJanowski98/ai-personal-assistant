@@ -190,16 +190,22 @@ Return the document in markdown format regardless of the original format.
             try:
                 # Truncate content if necessary to fit model's context window
                 content = document.content
-                if len(content) > 8000:  # Arbitrary limit based on model's context window
-                    logger.info(f"Truncating document {document.id} content to fit context window")
+                if (
+                    len(content) > 8000
+                ):  # Arbitrary limit based on model's context window
+                    logger.info(
+                        f"Truncating document {document.id} content to fit context window"
+                    )
                     content = content[:8000]
-                
+
                 # Combine system and user messages into one user message for Ollama
-                combined_prompt = "You are a helpful assistant specialized in summarizing documents.\n\n" + self.SYSTEM_PROMPT_TEMPLATE.format(
-                    characters=self.max_characters, 
-                    content=content
+                combined_prompt = (
+                    "You are a helpful assistant specialized in summarizing documents.\n\n"
+                    + self.SYSTEM_PROMPT_TEMPLATE.format(
+                        characters=self.max_characters, content=content
+                    )
                 )
-                
+
                 response = await acompletion(
                     model=self.model_id,
                     messages=[
@@ -220,12 +226,14 @@ Return the document in markdown format regardless of the original format.
                     return document
 
                 summary: str = response.choices[0].message.content
-                
+
                 # Ensure summary doesn't exceed max_characters
                 if len(summary) > self.max_characters:
-                    logger.info(f"Truncating summary for document {document.id} to {self.max_characters} characters")
-                    summary = summary[:self.max_characters]
-                    
+                    logger.info(
+                        f"Truncating summary for document {document.id} to {self.max_characters} characters"
+                    )
+                    summary = summary[: self.max_characters]
+
                 return document.add_summary(summary)
             except Exception as e:
                 logger.warning(f"Failed to summarize document {document.id}: {str(e)}")

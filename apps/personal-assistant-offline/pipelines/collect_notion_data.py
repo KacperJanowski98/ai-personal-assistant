@@ -11,9 +11,7 @@ from steps.infrastructure import save_documents_to_disk
 
 
 @pipeline
-def collect_notion_data(
-    database_ids: list[str], data_dir: Path
-) -> None:
+def collect_notion_data(database_ids: list[str], data_dir: Path) -> None:
     notion_data_dir = data_dir / "notion"
     notion_data_dir.mkdir(parents=True, exist_ok=True)
 
