@@ -1,3 +1,5 @@
+# Offline Module
+
 ## Installation
 
 To install the dependencies and activate the virtual environment, run the following commands:
@@ -40,7 +42,7 @@ make local-infrastructure-down
 ```
 
 > [!NOTE]
-> To visualize the raw and RAG data from MongoDB, you can use [MongoDB Compass](https://www.mongodb.com/try/download/compass).
+> To visualize the raw and RAG data from MongoDB, you can use [MongoDB Compass](https://rebrand.ly/second-brain-course-mongodb-compass).
 
 ## ETL pipeline
 
