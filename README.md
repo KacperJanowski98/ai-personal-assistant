@@ -4,7 +4,7 @@
 Knowledge Navigator is an intelligent assistant that interfaces with your personal knowledge management system, transforming your digital notes into an interactive AI-powered experience. By leveraging advanced language models, it helps you extract, analyze, and utilize information from your existing knowledge base.
 
 ## What You'll Learn
-The project is based on a series of articles by Paul Lusztin and covers a wide range of modern practices in artificial intelligence and software engineering:
+The project is based on a series of articles by Paul Lusztin and the book LLM Engineer's Handbook and covers a wide range of modern practices in artificial intelligence and software engineering:
 
 ### AI Architecture & MLOps
 - Design and implement systems using the FTI (Flexible, Transparent, Iterative) architecture
