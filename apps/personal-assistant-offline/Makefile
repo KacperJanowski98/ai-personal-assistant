@@ -1,5 +1,15 @@
 # --- Infrastructure --- 
 
+local-zenml-server-up:
+ifeq ($(shell uname), Darwin)
+	OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES uv run zenml login --local
+else
+	uv run zenml login --local
+endif
+
+local-zenml-server-stop:
+	uv run zenml logout --local
+
 local-docker-infrastructure-up:
 	docker compose -f ../infrastructure/docker/docker-compose.yml up --build -d 
 
