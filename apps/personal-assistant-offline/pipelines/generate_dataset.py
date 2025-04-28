@@ -15,7 +15,7 @@ def generate_dataset(
     extract_collection_name: str,
     load_dataset_id: str,
     fetch_limit: int = 1000,
-    summarization_agent_model_id: str = "qwen2.5:7b",
+    summarization_agent_model_id: str = "ollama/qwen2.5-custom:7b",
     summarization_agent_mock: bool = False,
     summarization_max_characters: int = 256,
     val_split_ratio: float = 0.1,

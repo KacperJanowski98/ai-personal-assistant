@@ -2,7 +2,7 @@ parameters:
   extract_collection_name: raw
   load_dataset_id: summarization_task
   fetch_limit: 1000
-  summarization_agent_model_id: qwen2.5:7b
+  summarization_agent_model_id: ollama/qwen2.5:7b
   summarization_agent_mock: false
   summarization_max_characters: 256
   val_split_ratio: 0.1
