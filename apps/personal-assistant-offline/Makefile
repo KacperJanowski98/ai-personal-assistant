@@ -23,3 +23,6 @@ collect-notion-data-pipeline:
 
 etl-pipeline:
 	uv run python -m tools.run --run-etl-pipeline --no-cache
+
+generate-dataset-pipeline:
+	uv run python -m tools.run --run-generate-dataset-pipeline --no-cache

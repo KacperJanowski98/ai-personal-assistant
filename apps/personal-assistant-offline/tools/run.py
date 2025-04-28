@@ -7,6 +7,7 @@ import click
 from pipelines import (
     collect_notion_data,
     etl,
+    generate_dataset,
 )
 
 
@@ -50,12 +51,19 @@ Examples:
     default=False,
     help="Whether to run the ETL pipeline.",
 )
+@click.option(
+    "--run-generate-dataset-pipeline",
+    is_flag=True,
+    default=False,
+    help="Whether to run the generate dataset pipeline.",
+)
 def main(
     no_cache: bool = False,
     run_collect_notion_data_pipeline: bool = False,
     run_etl_pipeline: bool = False,
+    run_generate_dataset_pipeline: bool = False,
 ) -> None:
-    assert run_collect_notion_data_pipeline or run_etl_pipeline, (
+    assert run_collect_notion_data_pipeline or run_etl_pipeline or run_generate_dataset_pipeline, (
         "Please specify an action to run."
     )
 
@@ -83,6 +91,17 @@ def main(
         )
         pipeline_args["run_name"] = f"etl_run_{dt.now().strftime('%Y_%m_%d_%H_%M_%S')}"
         etl.with_options(**pipeline_args)(**run_args)
+
+    if run_generate_dataset_pipeline:
+        run_args = {}
+        pipeline_args["config_path"] = root_dir / "configs" / "generate_dataset.yaml"
+        assert pipeline_args["config_path"].exists(), (
+            f"Config file not found: {pipeline_args['config_path']}"
+        )
+        pipeline_args["run_name"] = (
+            f"generate_dataset_run_{dt.now().strftime('%Y_%m_%d_%H_%M_%S')}"
+        )
+        generate_dataset.with_options(**pipeline_args)(**run_args)
 
 
 if __name__ == "__main__":
