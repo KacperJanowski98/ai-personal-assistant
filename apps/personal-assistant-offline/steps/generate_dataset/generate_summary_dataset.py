@@ -1,7 +1,9 @@
 from typing_extensions import Annotated
 from zenml import step
 
-from src.personal_assistant_offline.application.dataset import SummarizationDatasetGenerator
+from src.personal_assistant_offline.application.dataset import (
+    SummarizationDatasetGenerator,
+)
 from src.personal_assistant_offline.domain import Document, InstructDataset
 
 

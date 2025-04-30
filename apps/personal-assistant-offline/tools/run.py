@@ -63,9 +63,11 @@ def main(
     run_etl_pipeline: bool = False,
     run_generate_dataset_pipeline: bool = False,
 ) -> None:
-    assert run_collect_notion_data_pipeline or run_etl_pipeline or run_generate_dataset_pipeline, (
-        "Please specify an action to run."
-    )
+    assert (
+        run_collect_notion_data_pipeline
+        or run_etl_pipeline
+        or run_generate_dataset_pipeline
+    ), "Please specify an action to run."
 
     pipeline_args: dict[str, Any] = {
         "enable_cache": not no_cache,
