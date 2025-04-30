@@ -109,7 +109,7 @@ Notion Documents (Extract) → Web Crawling (Transform) → Quality Scoring (Tra
 
 ![mongodb](../../doc/images/mongodb.png)
 
-## Data Flow
+### Data Flow
 
 1. The pipeline starts by reading Notion documents from the local filesystem
 2. It extracts and processes URLs found within these documents
@@ -117,10 +117,31 @@ Notion Documents (Extract) → Web Crawling (Transform) → Quality Scoring (Tra
 4. The system enriches documents with metadata, quality scores, and relationships
 5. Processed documents are stored both on disk and in MongoDB for retrieval
 
-## Technical Highlights
+### Technical Highlights
 
 - **MLOps Integration**: ZenML orchestration for reproducible pipeline runs
 - **Metadata Tracking**: Comprehensive logging of document processing metrics
 - **Quality Control**: Intelligent filtering to prioritize high-quality content
 - **Scalability**: Parallel processing with configurable resource utilization
 - **Flexibility**: Modular design allows for easy extension and customization
+
+## Generate Fine-tuning Dataset
+
+1. Extracted Raw Data: Pulled the initial set of raw documents (~400) from MongoDB.
+2. Initial Data Exploration: Used histograms to analyze the content length and quality scores of the extracted documents.
+3. Threshold Determination: Examined the distributions revealed by the histograms to decide on suitable thresholds for filtering 4. out low-quality or insufficient documents.
+
+![histogram](../../doc/images/histogram_chart.png)
+
+4. First Filtering (Documents): Applied the determined thresholds to filter out "noisy" documents (those with low quality scores or not enough descriptive content), resulting in a smaller set of ~250 high-quality documents.
+5. Summary Generation: Generated summaries for each of the ~250 high-quality documents using Large Language Models (LLMs) and specific prompt engineering techniques.
+6. Data Augmentation: Generated multiple summaries for each document (by varying LLM parameters like temperature) to increase the dataset size and capture variations for model fine-tuning.
+7. Second Filtering (Summaries): Applied another layer of filtering specifically to the generated summaries, removing those that did not meet desired length and quality criteria.
+8. Data Splitting & Packaging: Split the final set of filtered, high-quality summaries into training, evaluation, and testing sets Packaged these splits into the final dataset structure.
+9. Dataset Publication: Pushed the final summarization instruct dataset to the Hugging Face Data Registry.
+
+![hugging_face](../../doc/images/hugging_face_dataset.png)
+
+10. Pipeline Management: Utilized ZenML as the MLOps framework to orchestrate, run, track, and version the entire pipeline, including its configurations and output artifacts.
+
+![dataset_generate_pipeline](../../doc/images/datset_generation_pipeline.png)
