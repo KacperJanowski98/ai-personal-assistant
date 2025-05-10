@@ -145,3 +145,78 @@ Notion Documents (Extract) → Web Crawling (Transform) → Quality Scoring (Tra
 10. Pipeline Management: Utilized ZenML as the MLOps framework to orchestrate, run, track, and version the entire pipeline, including its configurations and output artifacts.
 
 ![dataset_generate_pipeline](../../doc/images/datset_generation_pipeline.png)
+
+## Fine-tuning LLM for Document Summarization
+
+To enhance the capabilities of our RAG system, particularly in generating concise and relevant summaries from retrieved documents, we undertook a fine-tuning process for a state-of-the-art Large Language Model (LLM). This specialized model forms a crucial component of our information synthesis pipeline.
+
+### Objective
+
+The primary goal of fine-tuning was to adapt a general-purpose LLM to excel specifically at document summarization tasks. We aimed to create a model that could:
+*   Understand the nuances of our specific document types (or the general domain of documents targeted).
+*   Generate summaries that are coherent, accurate, and capture the key information from the source text.
+*   Produce summaries in a style and length suitable for integration into our RAG system's output.
+
+### Model Selection
+
+*   **Base Model:** Llama 3.1 8B
+*   **Rationale:** We selected Llama 3.1 8B due to its strong foundational capabilities, impressive performance on various NLP benchmarks, and its manageable size for fine-tuning within reasonable resource constraints (especially relevant for Google Colab environments). The 8B parameter version offers a good balance between performance and computational cost.
+
+### Fine-tuning Framework and Environment
+
+*   **Framework:** Unsloth
+    *   **Rationale:** Unsloth was chosen for its significant speed improvements (up to 2x faster) and memory efficiency (up to 60% less RAM) when fine-tuning LLMs. This allows for training larger models or using larger batch sizes on available hardware, even free-tier Google Colab GPUs. Unsloth achieves this through optimized kernels, re-engineered RoPE scaling, and efficient implementations of techniques like LoRA.
+*   **Underlying Libraries:** The process leverages Hugging Face Transformers, PEFT (Parameter-Efficient Fine-Tuning), and bitsandbytes (for quantization, if used).
+*   **Environment:** Google Colab
+    *   **GPU:** The fine-tuning was performed on a Google Colab instance equipped with a GPU (e.g., NVIDIA T4, V100, or A100, available in free or paid tiers). Unsloth's efficiency makes it particularly well-suited for these environments.
+*   **Programming Language:** Python
+
+### Fine-tuning Process
+
+The fine-tuning process followed these key steps:
+
+1.  **Environment Setup:**
+    *   Installation of Unsloth, Transformers, PEFT, bitsandbytes, accelerate, and other necessary libraries.
+    *   Configuration of the Colab runtime to utilize the available GPU.
+
+2.  **Data Preparation:**
+    *   Loading the custom summarization dataset.
+    *   Preprocessing the data, including tokenization using the Llama 3.1 8B tokenizer. A specific instruction-following prompt template was used to structure the input for the model. For example:
+        ```
+        <s>[INST] Summarize the following document:
+        {document_text} [/INST] {summary_text} </s>
+        ```
+    *   Splitting the dataset into training and (optional) validation sets.
+
+3.  **Model Configuration & Loading:**
+    *   Loading the Llama 3.1 8B model using Unsloth's `FastLanguageModel`. This step often includes options for `dtype` (e.g., `bfloat16` for faster training) and `load_in_4bit` or `load_in_8bit` for QLoRA (Quantized Low-Rank Adaptation) to further reduce memory footprint.
+    *   Preparing the model for PEFT, specifically using LoRA (Low-Rank Adaptation) or QLoRA. This involves adding small, trainable adapter layers to the model.
+        *   **LoRA Configuration:** Key parameters like `r` (rank of the decomposition), `lora_alpha`, `target_modules` (specifying which layers to apply LoRA to, e.g., `q_proj`, `k_proj`, `v_proj`, `o_proj`), and `lora_dropout` were set.
+
+4.  **Training:**
+    *   Utilizing the `SFTTrainer` (Supervised Fine-tuning Trainer) from the TRL (Transformer Reinforcement Learning) library, which is compatible with Unsloth.
+    *   Defining `TrainingArguments` including:
+        *   `per_device_train_batch_size`
+        *   `gradient_accumulation_steps`
+        *   `warmup_steps`
+        *   `num_train_epochs` (or `max_steps`)
+        *   `learning_rate`
+        *   `fp16` or `bf16` (for mixed-precision training)
+        *   `logging_steps`
+        *   `optim` (e.g., `adamw_8bit` if using 8-bit optimizers with Unsloth)
+        *   `weight_decay`
+        *   `lr_scheduler_type`
+    *   Initiating the training process. Unsloth's optimizations were active during this phase, leading to faster training iterations and reduced memory usage.
+
+5.  **Model Saving & Evaluation (Iterative):**
+    *   The fine-tuned LoRA adapters were saved periodically.
+    *   (Optional: If a validation set was used, performance metrics like perplexity or ROUGE scores were monitored.)
+    *   Qualitative evaluation was performed by generating summaries for sample documents and assessing their quality.
+
+### Outcome
+
+The fine-tuning process resulted in a Llama 3.1 8B model specialized for document summarization. This model, equipped with the trained LoRA adapters, demonstrates improved performance on our specific summarization tasks compared to the base model. The resulting adapters are lightweight and can be easily loaded on top of the original Llama 3.1 8B model for inference.
+
+The LoRA weights was merged into the base model to create a standalone fine-tuned model. Model is available on [Hugging Face](https://huggingface.co/Kacper098/Meta-Llama-3.1-8B-Instruct-Assistant-Summarization)
+
+![hugging_face_llm](../../doc/images/hugging_face_llm.png)
