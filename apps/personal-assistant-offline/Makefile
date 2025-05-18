@@ -41,3 +41,17 @@ compute-rag-vector-index-openai-parent-pipeline:
 
 delete-rag-collection:
 	uv run python -m tools.delete_rag_collection
+
+# --- Check RAG Ingestion ---
+
+check-rag-huggingface-contextual-simple:
+	uv run python -m tools.rag --config ./configs/compute_rag_vector_index_huggingface_contextual_simple.yaml
+
+check-rag-openai-contextual-simple:
+	uv run python -m tools.rag --config ./configs/compute_rag_vector_index_openai_contextual_simple.yaml
+
+check-rag-openai-contextual:
+	uv run python -m tools.rag --config ./configs/compute_rag_vector_index_openai_contextual.yaml
+
+check-rag-openai-parent:
+	uv run python -m tools.rag --config ./configs/compute_rag_vector_index_openai_parent.yaml
