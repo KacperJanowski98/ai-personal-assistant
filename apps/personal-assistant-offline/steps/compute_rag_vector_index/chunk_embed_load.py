@@ -2,9 +2,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Generator
 
 from langchain_core.documents import Document as LangChainDocument
-from langchain_mongodb.retrievers import (
-    MongoDBAtlasParentDocumentRetriever
-)
+from langchain_mongodb.retrievers import MongoDBAtlasParentDocumentRetriever
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from loguru import logger
 from tqdm import tqdm
@@ -20,7 +18,7 @@ from src.personal_assistant_offline.application.rag.retrievers import RetrieverT
 from src.personal_assistant_offline.domain import Document
 from src.personal_assistant_offline.infrastructure.mongo import (
     MongoDBIndex,
-    MongoDBService
+    MongoDBService,
 )
 
 
@@ -73,7 +71,7 @@ def chunk_embed_load(
         mock=mock,
         max_concurrent_requests=processing_max_workers,
     )
-    
+
     with MongoDBService(
         model=Document, collection_name=collection_name
     ) as mongodb_client:
