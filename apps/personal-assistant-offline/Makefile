@@ -26,3 +26,18 @@ etl-pipeline:
 
 generate-dataset-pipeline:
 	uv run python -m tools.run --run-generate-dataset-pipeline --no-cache
+
+compute-rag-vector-index-huggingface-contextual-simple-pipeline:
+	uv run python -m tools.run --run-compute-rag-vector-index-huggingface-contextual-simple-pipeline --no-cache
+
+compute-rag-vector-index-openai-contextual-simple-pipeline:
+	uv run python -m tools.run --run-compute-rag-vector-index-openai-contextual-simple-pipeline --no-cache
+
+compute-rag-vector-index-openai-contextual-pipeline:
+	uv run python -m tools.run --run-compute-rag-vector-index-openai-contextual-pipeline --no-cache
+
+compute-rag-vector-index-openai-parent-pipeline:
+	uv run python -m tools.run --run-compute-rag-vector-index-openai-parent-pipeline --no-cache
+
+delete-rag-collection:
+	uv run python -m tools.delete_rag_collection
