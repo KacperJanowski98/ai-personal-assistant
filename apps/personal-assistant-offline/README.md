@@ -146,7 +146,7 @@ Notion Documents (Extract) → Web Crawling (Transform) → Quality Scoring (Tra
 
 ![dataset_generate_pipeline](../../doc/images/datset_generation_pipeline.png)
 
-## Fine-tuning LLM for Document Summarization
+# Fine-tuning LLM for Document Summarization
 
 To enhance the capabilities of our RAG system, particularly in generating concise and relevant summaries from retrieved documents, we undertook a fine-tuning process for a state-of-the-art Large Language Model (LLM). This specialized model forms a crucial component of our information synthesis pipeline.
 
@@ -220,3 +220,131 @@ The fine-tuning process resulted in a Llama 3.1 8B model specialized for documen
 The LoRA weights was merged into the base model to create a standalone fine-tuned model. Model is available on [Hugging Face](https://huggingface.co/Kacper098/Meta-Llama-3.1-8B-Instruct-Assistant-Summarization)
 
 ![hugging_face_llm](../../doc/images/hugging_face_llm.png)
+
+# RAG Feature Pipeline - Populate the RAG Vector Databse
+
+## Overview
+
+The primary goal of this RAG feature pipeline is to create a smooth data flow from fetching raw documents to creating a vector search index. It ingests various document types, processes them into optimized chunks, enriches them using advanced RAG techniques, and stores them efficiently for retrieval. The final output is a structured knowledge base, ready to be used by downstream RAG inference pipelines.
+
+## Pipeline Interface
+
+-   **Input:** Raw documents from a `MongoDB` collection. This collection unifies cleaned, standardized Notion documents and crawled web resources. The pipeline processes documents agnostically to their source.
+-   **Output:**
+    -   Chunked and embedded documents stored in a separate `MongoDB` collection.
+    -   An Approximate Nearest Neighbor (ANN) index referencing the embedding fields to enable semantic search.
+
+## Role in the ML System
+
+This RAG feature pipeline is an **offline ML pipeline**. This means:
+-   It runs as a batch process, either on a schedule or triggered.
+-   It handles data processing tasks independently of user queries.
+-   It extracts, processes, and stores structured information for on-demand access by other pipelines or applications.
+
+This contrasts with **online pipelines** (like our RAG inference pipeline, implemented as an agentic RAG module), which interact directly with users in real-time. By keeping ingestion and retrieval separate, the system can scale efficiently in production, as data is pre-processed and ready for querying.
+
+## Pipeline Architecture
+
+The architecture is designed to transform raw documents into a high-quality, searchable knowledge base.
+
+![rag_pipeline](../../doc/images/rag_pipeline.png)
+
+### 1. Data Extraction
+-   **Source:** Documents are extracted from the unified `MongoDB` collection.
+
+### 2. Document Filtering
+-   **Process:** Raw documents undergo a filtering step to remove low-quality content.
+-   **Mechanism:** A pre-computed quality score for each document is used to retain only meaningful and reliable information.
+
+### 3. Chunking & Post-Processing
+-   **Process:** Filtered documents are divided into smaller chunks. Each chunk then undergoes post-processing based on one of two distinct retrieval strategies:
+    -   **Parent Retrieval:** Chunks are linked to their parent documents without additional summarization. This strategy ensures retrieval captures both fine-grained details and their broader context.
+    -   **Contextual Retrieval:** Chunks are enriched with contextual summaries. These summaries can be high-level overviews of the document or tailored to the specific content of each chunk, aiming to improve search accuracy.
+
+### 4. Embedding
+-   **Process:** After chunking and post-processing, all chunks (from both retrieval strategy paths) converge at this step.
+-   **Mechanism:** Chunks are converted into vector embeddings using a selected embedding model (e.g., OpenAI, Hugging Face).
+
+### 5. Storage & Indexing
+-   **Process:** The generated vector embeddings are stored in a vector database.
+-   **Mechanism:** These embeddings are indexed in `MongoDB` to facilitate efficient semantic search during the inference phase.
+
+## Management with ZenML
+
+The entire RAG feature pipeline is orchestrated and managed using **ZenML**, an MLOps framework.
+-   **Orchestration:** ZenML manages the entry point and execution flow of the ingestion pipeline.
+-   **Customization & Experimentation:** The pipeline is highly configurable via a `YAML` file. This allows for:
+    -   Easy switching between retrieval strategies (contextual vs. parent).
+    -   Selection of different embedding models (e.g., OpenAI, Hugging Face).
+    -   Adjustment of other key parameters without code modification.
+-   **MLOps Benefits:** Using ZenML enables:
+    -   **Fast Experimentation:** Quickly iterate on different configurations.
+    -   **Lineage:** Track the origin and transformation of data and artifacts.
+    -   **Versioning:** Version pipeline code, configurations, and artifacts.
+    -   **Reproducibility:** Ensure experiments and pipeline runs can be reliably reproduced.
+
+## Key Features
+
+-   **Unified Data Ingestion:** Handles diverse document sources from a single `MongoDB` collection.
+-   **Quality-Based Filtering:** Ensures only high-value content proceeds through the pipeline.
+-   **Advanced RAG Techniques:** Implements both Parent Retrieval and Contextual Retrieval strategies for chunk enrichment.
+-   **Configurable Embedding Models:** Supports multiple embedding models for flexibility.
+-   **Efficient Vector Storage & Indexing:** Leverages `MongoDB` for storing embeddings and enabling semantic search.
+-   **Offline Batch Processing:** Designed for scheduled or triggered runs, independent of real-time queries.
+-   **Scalable Design:** Separation of ingestion and retrieval supports production scaling.
+-   **ZenML Orchestration:** Robust MLOps capabilities including versioning, lineage, and reproducibility.
+-   **Configuration-Driven:** Pipeline behavior managed through `YAML` files for easy experimentation.
+
+## Parent Retrieval Algorithm with OpenAI models
+
+```bash
+make delete-rag-collection
+make compute-rag-vector-index-openai-parent-pipeline
+```
+
+Check that the RAG ingestion worked:
+
+```bash
+make check-rag-openai-parent
+```
+
+## Simple Contextual Retrieval Algorithm with OpenAI models
+
+Run the ingestion pipeline:
+```bash
+make delete-rag-collection
+make compute-rag-vector-index-openai-contextual-simple-pipeline
+```
+
+Check that the RAG ingestion worked:
+```bash
+make check-rag-openai-contextual-simple
+```
+
+## Simple Contextual Retrieval Algorithm with Hugging Face Inference Endpoints (Optional)
+
+Before running this step, make sure you have deployed your Hugging Face model to Hugging Face Inference Endpoints and that it is not idle (it goes idle out-of-box after 15 minutes of inactivity).
+
+Run the ingestion pipeline:
+```bash
+make delete-rag-collection
+make compute-rag-vector-index-huggingface-contextual-simple-pipeline
+```
+
+Check that the RAG ingestion worked:
+```bash
+make check-rag-huggingface-contextual-simple
+```
+
+## Full-fledged Contextual Retrieval Algorithm with OpenAI models
+
+Run the ingestion pipeline:
+```bash
+make delete-rag-collection
+make compute-rag-vector-index-openai-contextual-pipeline
+```
+
+Check that the RAG ingestion worked:
+```bash
+make check-rag-openai-contextual
+```
