@@ -12,7 +12,6 @@ from src.personal_assistant_online.config import settings
 from .embeddings import EmbeddingModelType, EmbeddingsModel, get_embedding_model
 from .splitters import get_splitter
 
-
 RetrieverType = Literal["contextual", "parent"]
 RetrieverModel = Union[
     MongoDBAtlasHybridSearchRetriever, MongoDBAtlasParentDocumentRetriever

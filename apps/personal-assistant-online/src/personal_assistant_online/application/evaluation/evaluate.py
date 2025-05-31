@@ -5,7 +5,10 @@ from opik.evaluation import evaluate
 from opik.evaluation.metrics import AnswerRelevance, Hallucination, Moderation
 
 from src.personal_assistant_online import opik_utils
-from src.personal_assistant_online.application.agents import agents, extract_tool_responses
+from src.personal_assistant_online.application.agents import (
+    agents,
+    extract_tool_responses,
+)
 from src.personal_assistant_online.config import settings
 
 from .summary_density_heuristic import SummaryDensityHeuristic
