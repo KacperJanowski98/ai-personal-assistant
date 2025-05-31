@@ -1,11 +1,10 @@
 import opik
-from smolagents import tool
+from smolagents import Tool
 
 
-@opik.track(name="what_can_i_do")
-@tool
-def what_can_i_do(question: str) -> str:
-    """Returns a comprehensive list of available capabilities and topics in the Second Brain system.
+class WhatCanIDoTool(Tool):
+    name = "what_can_i_do"
+    description = """Returns a comprehensive list of available capabilities and topics in the Second Brain system.
 
     This tool should be used when:
     - The user explicitly asks what the system can do
@@ -17,22 +16,20 @@ def what_can_i_do(question: str) -> str:
     - The user asks a specific technical question
     - The user already knows what they want to learn about
     - The question is about a specific topic covered in the knowledge base
-
-    Args:
-        question: The user's query about system capabilities. While this parameter is required,
-                 the function returns a standard capability list regardless of the specific question.
-
-    Returns:
-        str: A formatted string containing categorized lists of example questions and topics
-             that users can explore within the Second Brain system.
-
-    Examples:
-        >>> what_can_i_do("What can this system do?")
-        >>> what_can_i_do("What kind of questions can I ask?")
-        >>> what_can_i_do("Help me understand what I can learn here")
     """
 
-    return """
+    inputs = {
+        "question": {
+            "type": "string",
+            "description": """The user's query about system capabilities. While this parameter is required,
+                             the function returns a standard capability list regardless of the specific question.""",
+        }
+    }
+    output_type = "string"
+
+    @opik.track(name="what_can_i_do")
+    def forward(self, question: str) -> str:
+        return """
 You can ask questions about the content in your Second Brain, such as:
 
 Architecture and Systems:

@@ -101,6 +101,9 @@ When using context from any document, also include the document URL as reference
 
     @track(name="MongoDBRetrieverTool.parse_query")
     def __parse_query(self, query: str) -> str:
-        query_dict = json.loads(query)
-
-        return query_dict["query"]
+        try:
+            query_dict = json.loads(query)
+            return query_dict["query"]
+        except json.JSONDecodeError:
+            # Query is already a plain string, just return it
+            return query

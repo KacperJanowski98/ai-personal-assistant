@@ -1,7 +1,8 @@
 import json
 from typing import Any
 
-from opik.evaluation.metrics import base_metric, exceptions, score_result
+from opik.evaluation.metrics import base_metric, score_result
+from opik import exceptions
 from opik.evaluation.models import LiteLLMChatModel
 from pydantic import BaseModel
 

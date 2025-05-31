@@ -12,7 +12,7 @@ from .tools import (
     HuggingFaceEndpointSummarizerTool,
     MongoDBRetrieverTool,
     OpenAISummarizerTool,
-    what_can_i_do,
+    WhatCanIDoTool,
 )
 
 
@@ -25,6 +25,8 @@ def get_agent(retriever_config_path: Path) -> "AgentWrapper":
 
 
 class AgentWrapper:
+    name = "Personal Assistant Agent"
+    
     def __init__(self, agent: MultiStepAgent) -> None:
         self.__agent = agent
 
@@ -42,6 +44,7 @@ class AgentWrapper:
 
     @classmethod
     def build_from_smolagents(cls, retriever_config_path: Path) -> "AgentWrapper":
+        what_can_i_do = WhatCanIDoTool()
         retriever_tool = MongoDBRetrieverTool(config_path=retriever_config_path)
         if settings.USE_HUGGINGFACE_DEDICATED_ENDPOINT:
             logger.warning(
@@ -76,8 +79,8 @@ class AgentWrapper:
         model = self.__agent.model
         metadata = {
             "system_prompt": self.__agent.system_prompt,
-            "system_prompt_template": self.__agent.system_prompt_template,
-            "tool_description_template": self.__agent.tool_description_template,
+            "system_prompt_template": getattr(self.__agent, 'system_prompt_template', 'N/A'),
+            "tool_description_template": getattr(self.__agent, 'tool_description_template', 'N/A'),
             "tools": self.__agent.tools,
             "model_id": self.__agent.model.model_id,
             "api_base": self.__agent.model.api_base,

@@ -1,9 +1,9 @@
 from .mongodb_retriever import MongoDBRetrieverTool
 from .summarizer import HuggingFaceEndpointSummarizerTool, OpenAISummarizerTool
-from .what_can_i_do import what_can_i_do
+from .what_can_i_do import WhatCanIDoTool
 
 __all__ = [
-    "what_can_i_do",
+    "WhatCanIDoTool",
     "MongoDBRetrieverTool",
     "HuggingFaceEndpointSummarizerTool",
     "OpenAISummarizerTool",
